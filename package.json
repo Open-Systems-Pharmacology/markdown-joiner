@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node ./src/index.js"
   },
+  "private": false,
   "keywords": [],
   "license": "GNU GENERAL PUBLIC LICENSE plus CLARIFYING ADDENDUM",
   "repository": {
