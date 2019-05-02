@@ -76,3 +76,9 @@ HTML and PDF documents can be styled independently by modifying `src/styles/html
 ```
 npm uninstall -g @ospsuite/markdown-joiner
 ```
+
+## NPM Publishing
+
+```
+npm publish --access public
+```
