@@ -6,7 +6,8 @@
   "main": "index.js",
   "bin": "./src/index.js",
   "scripts": {
-    "start": "node ./src/index.js"
+    "start": "node ./src/index.js",
+    "bundle": "npx nexe ./src/index.js -r ./src/styles/**/*"
   },
   "private": false,
   "keywords": [],
