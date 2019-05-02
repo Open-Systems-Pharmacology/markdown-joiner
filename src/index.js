@@ -21,23 +21,24 @@ const rimraf = require('rimraf');
 const main = () => {
   try {
     const args = parseArgumentOptions();
-    const parsedInput = parseInput(args.input);
+    const {force, input, output} = args;
+    const parsedInput = parseInput(input);
 
-    if (args.force) {
+    if (force) {
       debug('Deleting output folder.');
-      rimraf.sync(args.output);
-    } else if (fs.existsSync(args.output)) {
-      throw new Error('Output folder is not empty. Use -f to force delete.');
+      rimraf.sync(output);
+    } else if (fs.readdirSync(output).length > 0) {
+      throw new Error(`'${output}' is not empty. Use -f to force delete.`);
     }
 
-    createDirectory(args.output);
+    createDirectory(output);
 
     // MARKDOWN
-    const markdownDirectory = path.join(args.output, config.MARKDOWN_DIRECTORY);
+    const markdownDirectory = path.join(output, config.MARKDOWN_DIRECTORY);
     createDirectory(markdownDirectory);
 
     const introFileName = path.join(markdownDirectory, config.INTRO_FILE);
-    generateIntro(args.input, introFileName);
+    generateIntro(input, introFileName);
 
     const summaryFileName = path.join(markdownDirectory, config.SUMMARY_FILE);
     generateSummaryFileTitle(summaryFileName);
@@ -45,7 +46,7 @@ const main = () => {
     generateMarkdown(parsedInput, markdownDirectory);
 
     // HTML
-    const htmlDirectory = path.join(args.output, config.HTML_DIRECTORY);
+    const htmlDirectory = path.join(output, config.HTML_DIRECTORY);
     createDirectory(htmlDirectory);
     const stylesFile = path.join(__dirname, config.STYLES_DIRECTORY, config.HTML_STYLES_FILE);
     fs.writeFileSync(path.join(htmlDirectory, config.HTML_STYLES_FILE), fs.readFileSync(stylesFile));
@@ -53,7 +54,7 @@ const main = () => {
     generateHTML(parsedMarkdown, htmlDirectory);
 
     // PDF
-    const pdfDirectory = path.join(args.output, config.PDF_DIRECTORY);
+    const pdfDirectory = path.join(output, config.PDF_DIRECTORY);
     createDirectory(pdfDirectory);
     generatePDF(parsedMarkdown, pdfDirectory);
   } catch (error) {
