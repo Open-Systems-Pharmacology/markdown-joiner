@@ -10,6 +10,14 @@ Please follow `https://nodejs.org/en/download/` if you need to install node on y
 npm install -g @ospsuite/markdown-joiner
 ```
 
+## Using a Firewall?
+
+If you are behing a firewall, you may have to do the following before installing the package
+
+```
+npm config set proxy <proxy-servers-address>
+```
+
 # Usage
 
 ## Displaying help
