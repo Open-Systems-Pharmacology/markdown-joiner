@@ -27,7 +27,7 @@ const main = () => {
     if (force) {
       debug('Deleting output folder.');
       rimraf.sync(output);
-    } else if (fs.readdirSync(output).length > 0) {
+    } else if (fs.existsSync(output)  && fs.readdirSync(output).length > 0) {
       throw new Error(`'${output}' is not empty. Use -f to force delete.`);
     }
 
