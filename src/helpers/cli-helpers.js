@@ -3,8 +3,7 @@ const version = require('../../package.json').version;
 const path = require('path');
 const debug = require('debug')('CLIHelpers');
 const lodash = require('lodash');
-const flattenDeep = lodash.flattenDeep;
-const remove = lodash.remove;
+const { flattenDeep, remove } = lodash;
 
 const sanitizeArguments = () => {
   // Command line args are not parsed properly due to a
@@ -12,7 +11,6 @@ const sanitizeArguments = () => {
   // See https://github.com/nodejs/node/issues/21854
   // and https://github.com/PowerShell/PowerShell/issues/7400
   const sanitizedArgs = process.argv.map(entry => {
-
     // Here we're trying to capture the flag after the
     // escaped quotes.
     const regex = new RegExp(/"\s*-(.)\s*/gm);
@@ -36,8 +34,7 @@ const sanitizeArguments = () => {
   return consolidateArgs(flattenedArgs);
 };
 
-const consolidateArgs = (flattenedArgs) => {
-
+const consolidateArgs = flattenedArgs => {
   let isPreviousArgFlag = false;
   const finalArgs = [];
 
