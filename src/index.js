@@ -2,32 +2,27 @@
 
 const parseArgumentOptions = require('./helpers/cli-helpers').parseArgumentOptions;
 const debug = require('debug')('Main');
-const miscHelpers = require('./helpers/misc-helpers');
-const parseInput = miscHelpers.parseInput;
-const createDirectory = miscHelpers.createDirectory;
-const markdownHelpers = require('./helpers/markdown-helpers');
-const generateMarkdown = markdownHelpers.generateMarkdown;
-const generateSummaryFile = markdownHelpers.generateSummaryFile;
-const generateSummaryFileTitle = markdownHelpers.generateSummaryFileTitle;
-const generateIntro = markdownHelpers.generateIntro;
-const htmlHelpers = require('./helpers/html-helpers');
-const generateHTML = htmlHelpers.generateHTML;
 const path = require('path');
-const config = require('./config');
-const generatePDF = require('./helpers/pdf-helpers').generatePDF;
 const fs = require('fs');
 const rimraf = require('rimraf');
+const miscHelpers = require('./helpers/misc-helpers');
+const { parseInput, createDirectory } = miscHelpers;
+const markdownHelpers = require('./helpers/markdown-helpers');
+const { generateMarkdown, generateSummaryFile, generateSummaryFileTitle, generateIntro } = markdownHelpers;
+const { generateHTML } = require('./helpers/html-helpers');
+const config = require('./config');
+const generatePDF = require('./helpers/pdf-helpers').generatePDF;
 
 const main = () => {
   try {
     const args = parseArgumentOptions();
-    const {force, input, output} = args;
+    const { force, input, output } = args;
     const parsedInput = parseInput(input);
 
     if (force) {
       debug('Deleting output folder.');
       rimraf.sync(output);
-    } else if (fs.existsSync(output)  && fs.readdirSync(output).length > 0) {
+    } else if (fs.existsSync(output) && fs.readdirSync(output).length > 0) {
       throw new Error(`'${output}' is not empty. Use -f to force delete.`);
     }
 

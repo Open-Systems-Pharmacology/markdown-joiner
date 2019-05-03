@@ -1,14 +1,10 @@
 const debug = require('debug')('MarkdownHelpers');
-const config = require('../config');
 const fs = require('fs');
 const path = require('path');
-const miscHelpers = require('./misc-helpers');
-const hasChildren = miscHelpers.hasChildren;
-const writeToFile = miscHelpers.writeToFile;
-const isMarkdown = miscHelpers.isMarkdown;
-const fileShouldBeIgnored = miscHelpers.fileShouldBeIgnored;
-const isImage = miscHelpers.isImage;
 const glob = require('glob');
+const config = require('../config');
+const miscHelpers = require('./misc-helpers');
+const { hasChildren, writeToFile, isMarkdown, fileShouldBeIgnored, isImage } = miscHelpers;
 
 const generateMarkdown = (content, outputDirectory, parentDirectory = '') => {
   content.forEach(item => {
@@ -17,12 +13,7 @@ const generateMarkdown = (content, outputDirectory, parentDirectory = '') => {
       if (!fs.existsSync(folderName)) {
         fs.mkdirSync(folderName);
       }
-      generateMarkdownForChapter(
-        item,
-        folderName,
-        path.join(parentDirectory, item.name),
-        outputDirectory
-      );
+      generateMarkdownForChapter(item, folderName, path.join(parentDirectory, item.name), outputDirectory);
       generateMarkdown(item.children, outputDirectory, path.join(parentDirectory, item.name));
     }
   });
@@ -105,17 +96,9 @@ const generateSummaryFile = (content, summaryFileName, parentDirectory = '', lev
     if (item.type === 'directory') {
       const link = path.join(parentDirectory, item.name, `${item.name}.md`);
       const tab = '  ';
-      writeToFile(
-        summaryFileName,
-        `${tab.repeat(level)}* [${getChapterTitle(item)}](${encodeURI(link)})`
-      );
+      writeToFile(summaryFileName, `${tab.repeat(level)}* [${getChapterTitle(item)}](${encodeURI(link)})`);
       if (hasChildren(item)) {
-        generateSummaryFile(
-          item.children,
-          summaryFileName,
-          path.join(parentDirectory, item.name),
-          level
-        );
+        generateSummaryFile(item.children, summaryFileName, path.join(parentDirectory, item.name), level);
       }
     }
   });
