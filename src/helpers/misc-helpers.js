@@ -11,7 +11,7 @@ const parseInput = inputPath => {
   return tree.children;
 };
 
-const hasChildren = item => item.children && item.children.length;
+const hasChildren = item => item && item.children && item.children.length;
 
 const writeToFile = (outputFile, content) => {
   debug(`Writing content to file ${outputFile}`);

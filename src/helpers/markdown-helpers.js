@@ -6,26 +6,29 @@ const config = require('../config');
 const miscHelpers = require('./misc-helpers');
 const { hasChildren, writeToFile, isMarkdown, fileShouldBeIgnored, isImage } = miscHelpers;
 
-const generateMarkdown = (content, outputDirectory, parentDirectory = '') => {
+const generateMarkdown = (content, outputDirectory, parentDirectory = '', currentLevel = 0) => {
+  const level = getNextLevel(currentLevel);
+
   content.forEach(item => {
     if (item.type === config.DIRECTORY && hasChildren(item)) {
       const folderName = path.join(outputDirectory, parentDirectory, item.name);
       if (!fs.existsSync(folderName)) {
         fs.mkdirSync(folderName);
       }
-      generateMarkdownForChapter(item, folderName, path.join(parentDirectory, item.name), outputDirectory);
-      generateMarkdown(item.children, outputDirectory, path.join(parentDirectory, item.name));
+      generateMarkdownForChapter(item, folderName, path.join(parentDirectory, item.name), outputDirectory, level);
+      generateMarkdown(item.children, outputDirectory, path.join(parentDirectory, item.name), level);
     }
   });
 };
 
-const generateMarkdownForChapter = (chapter, folderName, parentDirectory, outputDirectory) => {
+const generateMarkdownForChapter = (chapter, folderName, parentDirectory, outputDirectory, level) => {
   if (!chapter.children) {
     return;
   }
   const outputFile = `${path.join(folderName, chapter.name)}.md`;
   debug(`Generating markdown for ${outputFile}`);
 
+  insertCharpterTitle(chapter, outputFile, level);
   insertChapterContent(chapter, outputFile);
 
   chapter.children.forEach(item => {
@@ -37,6 +40,12 @@ const generateMarkdownForChapter = (chapter, folderName, parentDirectory, output
       }
     }
   });
+};
+
+const insertCharpterTitle = (chapter, outputFile, level) => {
+  debug(`Inserting title into ${chapter.path}`);
+  const title = getChapterTitle(chapter);
+  writeToFile(outputFile, `${'#'.repeat(level)} ${title}`);
 };
 
 const insertChapterContent = (chapter, outputFile) => {
@@ -83,12 +92,10 @@ const generateSummaryFileTitle = summaryFileName => {
   writeToFile(summaryFileName, config.SUMMARY_FILE_TITLE);
 };
 
-const generateSummaryFile = (content, summaryFileName, parentDirectory = '', level = 0) => {
-  const levelCount = Math.min(config.SECTION_LEVELS, config.MAX_SUPPORTED_SECTION_LEVELS);
-  level = level === levelCount ? level : level + 1;
-
+const generateSummaryFile = (content, summaryFileName, parentDirectory = '', currentLevel = 0) => {
   debug(`Generating summary file: ${summaryFileName}`);
 
+  const level = getNextLevel(currentLevel);
   content.forEach(item => {
     if (fileShouldBeIgnored(item)) {
       return;
@@ -96,12 +103,17 @@ const generateSummaryFile = (content, summaryFileName, parentDirectory = '', lev
     if (item.type === 'directory') {
       const link = path.join(parentDirectory, item.name, `${item.name}.md`);
       const tab = '  ';
-      writeToFile(summaryFileName, `${tab.repeat(level)}* [${getChapterTitle(item)}](${encodeURI(link)})`);
+      writeToFile(summaryFileName, `${tab.repeat(level)}* [${getChapterTitle(item)}](${link})`);
       if (hasChildren(item)) {
         generateSummaryFile(item.children, summaryFileName, path.join(parentDirectory, item.name), level);
       }
     }
   });
+};
+
+const getNextLevel = currentLevel => {
+  const levelCount = Math.min(config.SECTION_LEVELS, config.MAX_SUPPORTED_SECTION_LEVELS);
+  return currentLevel === levelCount ? currentLevel : currentLevel + 1;
 };
 
 const generateIntro = (inputPath, introFileName) => {
