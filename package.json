@@ -1,6 +1,6 @@
 {
   "name": "@ospsuite/markdown-joiner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Markdown reporting engine for the Open Systems Pharmacology platform",
   "author": "Open Systems Pharmacology",
   "main": "index.js",
@@ -11,7 +11,7 @@
   },
   "private": false,
   "keywords": [],
-  "license": "GNU GENERAL PUBLIC LICENSE plus CLARIFYING ADDENDUM",
+  "license": "SEE LICENSE IN <LICENSE>",
   "repository": {
     "type": "git",
     "url": "git://github.com/open-systems-pharmacology/markdown-joiner"
