@@ -1,0 +1,32 @@
+environment:
+  app_version: '1.0.1'
+
+version: '$(app_version).{build}'
+
+skip_branch_with_pr: true
+
+branches:
+  only:
+    - develop
+    - master
+
+pull_requests:
+  do_not_increment_build_number: true
+
+skip_tags: true
+
+install:
+  - npm install
+
+build_script:
+  - npm run bundle
+  - 7z a markdown-joiner.zip node_modules  src markdown-joiner.exe
+
+artifacts:
+  - path: '*.zip'
+    name: 'package'
+
+notifications:
+  - provider: Slack
+    incoming_webhook:
+      secure: 4MH9Em6TtrKalq6808dhPOqypTfYBJvVlqPaa9akNyF1h7st5qNdNezFp6T+bWXqrcZ4q/smtPcJ7LkUFHL46JDYUFlIL8FDz+ApX/vP+x0=
