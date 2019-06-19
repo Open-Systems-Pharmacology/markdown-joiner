@@ -4,24 +4,51 @@ const path = require('path');
 const glob = require('glob');
 const config = require('../config');
 const miscHelpers = require('./misc-helpers');
-const { hasChildren, writeToFile, isMarkdown, fileShouldBeIgnored, isImage } = miscHelpers;
+const { hasChildren, writeToFile, isMarkdown, fileShouldBeIgnored, isImage, parseInput, createDirectory } = miscHelpers;
 
-const generateMarkdown = (content, outputDirectory, parentDirectory = '', currentLevel = 0) => {
+const generateMarkdown = (input, markdownDirectory, createImageAsRelative = true) => {
+  const parsedInput = parseInput(input);
+  createDirectory(markdownDirectory);
+
+  const introFileName = path.join(markdownDirectory, config.INTRO_FILE);
+  generateIntro(input, introFileName);
+
+  const summaryFileName = path.join(markdownDirectory, config.SUMMARY_FILE);
+  generateSummaryFileTitle(summaryFileName);
+  generateSummaryFile(parsedInput, summaryFileName);
+  generateMarkdownForContent(parsedInput, markdownDirectory, createImageAsRelative);
+};
+
+const generateMarkdownForContent = (
+  content,
+  outputDirectory,
+  createImageAsRelative,
+  parentDirectory = '',
+  currentLevel = 0
+) => {
   const level = getNextLevel(currentLevel);
 
   content.forEach(item => {
     if (item.type === config.DIRECTORY && hasChildren(item)) {
+      const inputFolderName = path.join(parentDirectory, item.name);
       const folderName = path.join(outputDirectory, parentDirectory, item.name);
       if (!fs.existsSync(folderName)) {
         fs.mkdirSync(folderName);
       }
-      generateMarkdownForChapter(item, folderName, path.join(parentDirectory, item.name), outputDirectory, level);
-      generateMarkdown(item.children, outputDirectory, path.join(parentDirectory, item.name), level);
+      generateMarkdownForChapter(item, folderName, inputFolderName, outputDirectory, level, createImageAsRelative);
+      generateMarkdownForContent(item.children, outputDirectory, createImageAsRelative, inputFolderName, level);
     }
   });
 };
 
-const generateMarkdownForChapter = (chapter, folderName, parentDirectory, outputDirectory, level) => {
+const generateMarkdownForChapter = (
+  chapter,
+  folderName,
+  parentDirectory,
+  outputDirectory,
+  level,
+  createImageAsRelative
+) => {
   if (!chapter.children) {
     return;
   }
@@ -34,7 +61,7 @@ const generateMarkdownForChapter = (chapter, folderName, parentDirectory, output
   chapter.children.forEach(item => {
     if (item.type !== config.DIRECTORY) {
       if (isImage(item)) {
-        insertImage(item, outputFile, parentDirectory, outputDirectory);
+        insertImage(item, outputFile, parentDirectory, outputDirectory, createImageAsRelative);
       } else {
         insertMarkdown(item, outputFile, path.join(folderName, item.name));
       }
@@ -58,11 +85,13 @@ const insertChapterContent = (chapter, outputFile) => {
   writeToFile(outputFile, content);
 };
 
-const insertImage = (item, outputFile, parentDirectory, outputDirectory) => {
-  debug(`Inserting image ${item.name}`);
-  const imageMarkdown = `![${item.name}](${item.name})`;
+const insertImage = (item, outputFile, parentDirectory, outputDirectory, createImageAsRelative) => {
+  const imageTargetPath = path.join(outputDirectory, parentDirectory, item.name);
+  const imagePath = createImageAsRelative ? item.name : imageTargetPath;
+  debug(`Inserting image ${item.name} from ${imageTargetPath}`);
+  const imageMarkdown = `![${item.name}](${imagePath})`;
   writeToFile(outputFile, imageMarkdown);
-  fs.copyFileSync(item.path, path.join(outputDirectory, parentDirectory, item.name));
+  fs.copyFileSync(item.path, imageTargetPath);
 };
 
 const insertMarkdown = (item, outputFile) => {
@@ -129,8 +158,5 @@ const generateIntro = (inputPath, introFileName) => {
 };
 
 module.exports = {
-  generateMarkdown,
-  generateSummaryFile,
-  generateSummaryFileTitle,
-  generateIntro
+  generateMarkdown
 };
