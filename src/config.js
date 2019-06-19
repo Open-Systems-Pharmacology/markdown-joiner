@@ -7,6 +7,7 @@ const HTML_EXTENSION = '.html';
 const MARKDOWN_EXTENSIONS = [MD_EXTENSION];
 const HTML_DIRECTORY = 'html';
 const MARKDOWN_DIRECTORY = 'markdown';
+const MARKDOWN_DIRECTORY_FOR_PDF = 'markdown_for_pdf';
 const PDF_DIRECTORY = 'pdf';
 const DIRECTORY = 'directory';
 const PDF_FILE = 'output.pdf';
@@ -37,6 +38,7 @@ module.exports = {
   CONTENT_FILE,
   IGNORE,
   MARKDOWN_DIRECTORY,
+  MARKDOWN_DIRECTORY_FOR_PDF,
   HTML_DIRECTORY,
   IMAGE_EXTENSIONS,
   MARKDOWN_EXTENSIONS,

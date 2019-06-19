@@ -70,7 +70,7 @@ npm run start -- --input "C:\reporting engine\reporting engine output" --output 
 ## Debugging script
 
 ```
-set DEBUG = * & npm run start -- --input <path_to_input_directory> --output <path_to_output_directory>
+set DEBUG=* & npm run start -- --input <path_to_input_directory> --output <path_to_output_directory>
 ```
 
 ## Styling HTML and PDF
