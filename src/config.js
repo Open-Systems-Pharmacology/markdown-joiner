@@ -1,14 +1,15 @@
 const CONTENT_FILE = '_content.md';
 const TITLE_FILE = '_title.md';
-const MARKDOWN_DIRECTORY = '_markdown';
-const HTML_DIRECTORY = '_html';
 const SUMMARY_FILE = 'summary.md';
 const IMAGE_EXTENSIONS = ['.png'];
 const MD_EXTENSION = '.md';
 const HTML_EXTENSION = '.html';
 const MARKDOWN_EXTENSIONS = [MD_EXTENSION];
+const HTML_DIRECTORY = 'html';
+const MARKDOWN_DIRECTORY = 'markdown';
+const MARKDOWN_DIRECTORY_FOR_PDF = 'markdown_for_pdf';
+const PDF_DIRECTORY = 'pdf';
 const DIRECTORY = 'directory';
-const PDF_DIRECTORY = '_pdf';
 const PDF_FILE = 'output.pdf';
 const STYLES_DIRECTORY = 'styles';
 const PDF_STYLES_FILE = 'pdf-styles.css';
@@ -37,6 +38,7 @@ module.exports = {
   CONTENT_FILE,
   IGNORE,
   MARKDOWN_DIRECTORY,
+  MARKDOWN_DIRECTORY_FOR_PDF,
   HTML_DIRECTORY,
   IMAGE_EXTENSIONS,
   MARKDOWN_EXTENSIONS,

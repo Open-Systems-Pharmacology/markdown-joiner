@@ -1,11 +1,9 @@
 const showdown = require('showdown');
-const config = require('../config');
-const miscHelpers = require('./misc-helpers');
-const hasChildren = miscHelpers.hasChildren;
-const isImage = miscHelpers.isImage;
-const writeToFile = miscHelpers.writeToFile;
 const fs = require('fs');
 const path = require('path');
+const config = require('../config');
+const miscHelpers = require('./misc-helpers');
+const { hasChildren, isImage, writeToFile } = miscHelpers;
 
 showdown.setOption('tables', true);
 const converter = new showdown.Converter();
