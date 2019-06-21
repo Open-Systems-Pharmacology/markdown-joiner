@@ -2,14 +2,13 @@ const markdownPDF = require('markdown-pdf');
 const path = require('path');
 const config = require('../config');
 const fs = require('fs');
+const _ = require('lodash');
 const through = require('through2');
 const cheerio = require('cheerio');
 const debug = require('debug')('PDFHelpers');
 const fileUrl = require('file-url');
 const miscHelpers = require('./misc-helpers');
 const { hasChildren, isMarkdown, fileShouldBeIgnored } = miscHelpers;
-
-const mdDocs = [];
 
 const preProcessHtml = () =>
   // eslint-disable-next-line func-names
@@ -38,12 +37,14 @@ const generatePDF = (content, outputDirectory) => {
   const summaryFile = path.join(outputDirectory, '..', config.MARKDOWN_DIRECTORY, config.SUMMARY_FILE);
   const introFile = path.join(outputDirectory, '..', config.MARKDOWN_DIRECTORY, config.INTRO_FILE);
 
+  let mdDocs = [];
+
   if (fs.existsSync(introFile)) {
     mdDocs.push(introFile);
   }
   mdDocs.push(summaryFile);
 
-  generatePDFFromMarkdown(content, outputDirectory);
+  generatePDFFromMarkdown(content, mdDocs);
 
   const bookPath = path.join(outputDirectory, config.PDF_FILE);
   const cssPath = path.join(__dirname, '..', config.STYLES_DIRECTORY, config.PDF_STYLES_FILE);
@@ -63,14 +64,12 @@ const generatePDF = (content, outputDirectory) => {
     });
 };
 
-const generatePDFFromMarkdown = (content, outputDirectory, parentDirectory = '') => {
-  content.forEach(item => {
-    if (fileShouldBeIgnored(item)) {
-      return;
-    }
+const generatePDFFromMarkdown = (content, mdDocs) => {
+  // Order by type to ensure that we get the folder content first and the subfolder after
+  _.orderBy(content.filter(x => !fileShouldBeIgnored(x)), 'type', 'desc').forEach(item => {
     if (item.type === config.DIRECTORY && hasChildren(item)) {
-      generatePDFFromMarkdown(item.children, outputDirectory, path.join(parentDirectory, item.name));
-    } else if (isMarkdown(item) && item.name !== config.SUMMARY_FILE) {
+      generatePDFFromMarkdown(item.children, mdDocs);
+    } else if (isMarkdown(item)) {
       mdDocs.push(item.path);
     }
   });
