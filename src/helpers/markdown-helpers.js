@@ -89,7 +89,7 @@ const insertImage = (item, outputFile, parentDirectory, outputDirectory, createI
   const imageTargetPath = path.join(outputDirectory, parentDirectory, item.name);
   const imagePath = createImageAsRelative ? item.name : imageTargetPath;
   debug(`Inserting image ${item.name} from ${imageTargetPath}`);
-  const imageMarkdown = `![${item.name}](${imagePath})`;
+  const imageMarkdown = `![${item.name}](${imagePath})\n`;
   writeToFile(outputFile, imageMarkdown);
   fs.copyFileSync(item.path, imageTargetPath);
 };
