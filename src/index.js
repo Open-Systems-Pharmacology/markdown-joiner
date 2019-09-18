@@ -8,7 +8,6 @@ const rimraf = require('rimraf');
 const miscHelpers = require('./helpers/misc-helpers');
 const { parseInput, createDirectory } = miscHelpers;
 const { generateMarkdown } = require('./helpers/markdown-helpers');
-const { generateHTML } = require('./helpers/html-helpers');
 const config = require('./config');
 const generatePDF = require('./helpers/pdf-helpers').generatePDF;
 
@@ -29,9 +28,6 @@ const main = () => {
     // MARKDOWN
     const markdownDirectory = path.join(output, config.MARKDOWN_DIRECTORY);
     generateMarkdown(input, markdownDirectory);
-
-    // HTML
-    generateHtmlFor(output, markdownDirectory);
 
     // PDF
     generatePdfFor(input, output);
@@ -55,17 +51,6 @@ const generatePdfFor = (input, output) => {
   const parsedMarkdown = parseInput(markdownDirectoryForPDF);
 
   generatePDF(parsedMarkdown, pdfDirectory);
-};
-
-const generateHtmlFor = (output, markdownDirectory) => {
-  const htmlDirectory = path.join(output, config.HTML_DIRECTORY);
-  createDirectory(htmlDirectory);
-
-  const stylesFile = path.join(__dirname, config.STYLES_DIRECTORY, config.HTML_STYLES_FILE);
-  fs.writeFileSync(path.join(htmlDirectory, config.HTML_STYLES_FILE), fs.readFileSync(stylesFile));
-
-  const parsedMarkdown = parseInput(markdownDirectory);
-  generateHTML(parsedMarkdown, htmlDirectory);
 };
 
 main();

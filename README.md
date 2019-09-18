@@ -28,7 +28,7 @@ markdown-joiner --help
 Usage: markdown-joiner [options]
 
 Options:
-  -V, --version        output the version number
+  -v, --version        output the version number
   -i, --input [path]   Path to the input directory
   -o, --output [path]  Path to the output directory
   -f, --force          Force clean the output directory before generating files
@@ -73,10 +73,9 @@ npm run start -- --input "C:\reporting engine\reporting engine output" --output 
 set DEBUG=* & npm run start -- --input <path_to_input_directory> --output <path_to_output_directory>
 ```
 
-## Styling HTML and PDF
+## Styling PDF
 
-HTML and PDF documents can be styled independently by modifying `src/styles/html-styles.css` and
-`src/styles/pdf-styles.css` respectively.
+PDF documents can be styled by modifying `src/styles/pdf-styles.css`.
 
 ## Uninstall
 
