@@ -19,6 +19,18 @@ const generateMarkdown = (input, markdownDirectory, createImageAsRelative = true
   generateMarkdownForContent(parsedInput, markdownDirectory, createImageAsRelative);
 };
 
+const generateSingleMarkdown = (input, markdownDirectory) => {
+  const parsedInput = parseInput(input);
+  createDirectory(markdownDirectory);
+  const imageDirectory = path.join(markdownDirectory, config.IMAGES_DIRECTORY);
+  const contentFile = path.join(markdownDirectory, config.SINGLE_MARKDOWN_FILE);
+  createDirectory(imageDirectory);
+  generateIntro(input, contentFile);
+  generateSummaryFileTitle(contentFile);
+  generateSummaryFile(parsedInput, contentFile, false);
+  generateSingleMarkdownContent(parsedInput, contentFile, imageDirectory);
+};
+
 const generateMarkdownForContent = (
   content,
   outputDirectory,
@@ -53,6 +65,7 @@ const generateMarkdownForChapter = (
     return;
   }
   const outputFile = `${path.join(folderName, chapter.name)}.md`;
+  const outputChapterDirectory = path.join(outputDirectory, parentDirectory);
   debug(`Generating markdown for ${outputFile}`);
 
   insertCharpterTitle(chapter, outputFile, level);
@@ -61,9 +74,50 @@ const generateMarkdownForChapter = (
   chapter.children.forEach(item => {
     if (item.type !== config.DIRECTORY) {
       if (isImage(item)) {
-        insertImage(item, outputFile, parentDirectory, outputDirectory, createImageAsRelative);
+        insertImage(item, outputFile, outputChapterDirectory, createImageAsRelative);
       } else {
-        insertMarkdown(item, outputFile, path.join(folderName, item.name));
+        insertMarkdown(item, outputFile);
+      }
+    }
+  });
+};
+
+const generateSingleMarkdownContent = (
+  content,
+  contentFile,
+  imageDirectory,
+  parentDirectory = '',
+  currentLevel = 0
+) => {
+  const level = getNextLevel(currentLevel);
+
+  content.forEach(item => {
+    if (item.type === config.DIRECTORY && hasChildren(item)) {
+      const inputFolderName = path.join(parentDirectory, item.name);
+      const outputImageFolderName = path.join(imageDirectory, parentDirectory, item.name);
+      if (!fs.existsSync(outputImageFolderName)) {
+        fs.mkdirSync(outputImageFolderName);
+      }
+      concatenateMarkdownForChapter(item, contentFile, outputImageFolderName, level);
+      generateSingleMarkdownContent(item.children, contentFile, imageDirectory, inputFolderName, level);
+    }
+  });
+};
+
+const concatenateMarkdownForChapter = (chapter, contentFile, outputImageFolderName, level) => {
+  if (!chapter.children) {
+    return;
+  }
+
+  insertCharpterTitle(chapter, contentFile, level);
+  insertChapterContent(chapter, contentFile);
+
+  chapter.children.forEach(item => {
+    if (item.type !== config.DIRECTORY) {
+      if (isImage(item)) {
+        insertImage(item, contentFile, outputImageFolderName, true);
+      } else {
+        insertMarkdown(item, contentFile);
       }
     }
   });
@@ -85,9 +139,10 @@ const insertChapterContent = (chapter, outputFile) => {
   writeToFile(outputFile, content);
 };
 
-const insertImage = (item, outputFile, parentDirectory, outputDirectory, createImageAsRelative) => {
-  const imageTargetPath = path.join(outputDirectory, parentDirectory, item.name);
-  const imagePath = createImageAsRelative ? item.name : imageTargetPath;
+const insertImage = (item, outputFile, outputDirectory, createImageAsRelative) => {
+  const imageTargetPath = path.join(outputDirectory, item.name);
+  const relativePath = createRelativePath(outputFile, imageTargetPath);
+  const imagePath = createImageAsRelative ? relativePath : imageTargetPath;
   debug(`Inserting image ${item.name} from ${imageTargetPath}`);
   const imageMarkdown = `![${item.name}](${imagePath})\n`;
   writeToFile(outputFile, imageMarkdown);
@@ -117,11 +172,25 @@ const getChapterTitle = chapter => {
   return fs.readFileSync(titleFile, 'utf8').replace(/^\s+|\s+$/g, '');
 };
 
+const createRelativePath = (fromFile, toFile) => {
+  const relativePath = path.relative(fromFile, toFile);
+  //needs to remove the first relative sign as we are dealing with files and not folder
+  if (relativePath.startsWith('..')) {
+    return relativePath.substr('../'.length);
+  }
+  return relativePath;
+};
 const generateSummaryFileTitle = summaryFileName => {
   writeToFile(summaryFileName, config.SUMMARY_FILE_TITLE);
 };
 
-const generateSummaryFile = (content, summaryFileName, parentDirectory = '', currentLevel = 0) => {
+const generateSummaryFile = (
+  content,
+  summaryFileName,
+  createFileLink = true,
+  parentDirectory = '',
+  currentLevel = 0
+) => {
   debug(`Generating summary file: ${summaryFileName}`);
 
   const level = getNextLevel(currentLevel);
@@ -130,11 +199,17 @@ const generateSummaryFile = (content, summaryFileName, parentDirectory = '', cur
       return;
     }
     if (item.type === 'directory') {
-      const link = path.join(parentDirectory, item.name, `${item.name}.md`);
+      const link = createFileLink ? path.join(parentDirectory, item.name, `${item.name}.md`) : `#${item.name}`;
       const tab = '  ';
       writeToFile(summaryFileName, `${tab.repeat(level)}* [${getChapterTitle(item)}](${link})`);
       if (hasChildren(item)) {
-        generateSummaryFile(item.children, summaryFileName, path.join(parentDirectory, item.name), level);
+        generateSummaryFile(
+          item.children,
+          summaryFileName,
+          createFileLink,
+          path.join(parentDirectory, item.name),
+          level
+        );
       }
     }
   });
@@ -158,5 +233,6 @@ const generateIntro = (inputPath, introFileName) => {
 };
 
 module.exports = {
-  generateMarkdown
+  generateMarkdown,
+  generateSingleMarkdown
 };

@@ -18,6 +18,8 @@ const INTRO_FILE = '_intro.md';
 const PAGE_BREAK = '<div class="page-break"></div>';
 const SUMMARY_FILE_TITLE = '# Table of Contents';
 const IGNORE = [TITLE_FILE, MARKDOWN_DIRECTORY, CONTENT_FILE, INTRO_FILE, SUMMARY_FILE];
+const SINGLE_MARKDOWN_FILE = 'content.md';
+const IMAGES_DIRECTORY = 'images';
 
 module.exports = {
   CONTENT_FILE,
@@ -38,5 +40,7 @@ module.exports = {
   PDF_STYLES_FILE,
   INTRO_FILE,
   PAGE_BREAK,
-  SUMMARY_FILE_TITLE
+  SUMMARY_FILE_TITLE,
+  SINGLE_MARKDOWN_FILE,
+  IMAGES_DIRECTORY
 };

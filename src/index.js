@@ -7,7 +7,7 @@ const fs = require('fs');
 const rimraf = require('rimraf');
 const miscHelpers = require('./helpers/misc-helpers');
 const { parseInput, createDirectory } = miscHelpers;
-const { generateMarkdown } = require('./helpers/markdown-helpers');
+const { generateMarkdown, generateSingleMarkdown } = require('./helpers/markdown-helpers');
 const config = require('./config');
 const generatePDF = require('./helpers/pdf-helpers').generatePDF;
 
@@ -30,7 +30,8 @@ const main = () => {
     generateMarkdown(input, markdownDirectory);
 
     // PDF
-    generatePdfFor(input, output);
+    const markdownDirectoryForPDF = path.join(output, config.MARKDOWN_DIRECTORY_FOR_PDF);
+    generateSingleMarkdown(input, markdownDirectoryForPDF);
   } catch (error) {
     let message = 'Unable to generate markdown. ';
     if (error.message) {
