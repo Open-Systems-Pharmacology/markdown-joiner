@@ -192,28 +192,38 @@ const generateSummaryFile = (
   currentLevel = 0
 ) => {
   debug(`Generating summary file: ${summaryFileName}`);
-
+  const tab = '  ';
   const level = getNextLevel(currentLevel);
+
   content.forEach(item => {
     if (fileShouldBeIgnored(item)) {
       return;
     }
-    if (item.type === 'directory') {
-      const link = createFileLink ? path.join(parentDirectory, item.name, `${item.name}.md`) : `#${item.name}`;
-      const tab = '  ';
-      writeToFile(summaryFileName, `${tab.repeat(level)}* [${getChapterTitle(item)}](${link})`);
-      if (hasChildren(item)) {
-        generateSummaryFile(
-          item.children,
-          summaryFileName,
-          createFileLink,
-          path.join(parentDirectory, item.name),
-          level
-        );
-      }
+    if (item.type !== 'directory') {
+      return;
+    }
+
+    const title = getChapterTitle(item);
+    const link = createFileLink ? path.join(parentDirectory, item.name, `${item.name}.md`) : `#${createAnchor(title)}`;
+
+    writeToFile(summaryFileName, `${tab.repeat(level)}* [${title}](${link})`);
+
+    if (hasChildren(item)) {
+      generateSummaryFile(item.children, summaryFileName, createFileLink, path.join(parentDirectory, item.name), level);
     }
   });
 };
+
+// Returns a valid markdown anchor from a header that can be used to navigate within a single document
+// code taken from https://gist.github.com/asabaylus/3071099#gistcomment-2563127 for completion
+const createAnchor = val =>
+  val
+    .toLowerCase()
+    .replace(/ /g, '-')
+    // single chars that are removed
+    .replace(/[`~!@#$%^&*()+=<>?,./:;"'|{}\[\]\\–—]/g, '')
+    // CJK punctuations that are removed
+    .replace(/[　。？！，、；：“”【】（）〔〕［］﹃﹄“”‘’﹁﹂—…－～《》〈〉「」]/g, '');
 
 const getNextLevel = currentLevel => {
   const levelCount = Math.min(config.SECTION_LEVELS, config.MAX_SUPPORTED_SECTION_LEVELS);
