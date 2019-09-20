@@ -54,16 +54,4 @@ const main = () => {
   }
 };
 
-const generatePdfFor = (input, output) => {
-  const pdfDirectory = path.join(output, config.PDF_DIRECTORY);
-  createDirectory(pdfDirectory);
-
-  const markdownDirectoryForPDF = path.join(output, config.MARKDOWN_DIRECTORY_FOR_PDF);
-  generateMarkdown(input, markdownDirectoryForPDF, false);
-
-  const parsedMarkdown = parseInput(markdownDirectoryForPDF);
-
-  generatePDF(parsedMarkdown, pdfDirectory);
-};
-
 main();
