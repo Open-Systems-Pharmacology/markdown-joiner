@@ -23,7 +23,7 @@ const IGNORE = [
 const SINGLE_MARKDOWN_FILE = 'report.md';
 const IMAGES_DIRECTORY = 'images';
 const ANCHOR_CHARS_TO_EXLUDE_FOR_GITHUB = '[`~!@#$%^&*()+=<>?,./:;"\'|{}\\–—]';
-const ANCHOR_CHARS_TO_EXLUDE_FOR_PDF = '[`~!@#$%^&*()+=<>?,/:;"\'|{}\\–—]';
+const ANCHOR_CHARS_TO_EXLUDE_FOR_PDF = '';
 
 module.exports = {
   CONTENT_FILE,
