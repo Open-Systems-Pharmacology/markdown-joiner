@@ -7,7 +7,7 @@ const fs = require('fs');
 const rimraf = require('rimraf');
 const miscHelpers = require('./helpers/misc-helpers');
 const { parseInput, createDirectory } = miscHelpers;
-const { generateMarkdown, generateSingleMarkdown } = require('./helpers/markdown-helpers');
+const { generateMarkdown } = require('./helpers/markdown-helpers');
 const config = require('./config');
 const generatePDF = require('./helpers/pdf-helpers').generatePDF;
 
@@ -23,15 +23,27 @@ const main = () => {
       throw new Error(`'${output}' is not empty. Use -f to force delete.`);
     }
 
-    createDirectory(output);
+    const createAnchor = val =>
+      val
+        .toLowerCase()
+        .replace(/ /g, '-')
+        // single chars that are removed
+        .replace(/[.]/g, '');
 
-    // MARKDOWN
-    const markdownDirectory = path.join(output, config.MARKDOWN_DIRECTORY);
-    generateMarkdown(input, markdownDirectory);
+    createDirectory(output);
+    // Github
+    generateMarkdown(
+      input,
+      path.join(output, config.MARKDOWN_DIRECTORY_FOR_GITHUB),
+      config.ANCHOR_CHARS_TO_EXLUDE_FOR_GITHUB
+    );
 
     // PDF
-    const markdownDirectoryForPDF = path.join(output, config.MARKDOWN_DIRECTORY_FOR_PDF);
-    generateSingleMarkdown(input, markdownDirectoryForPDF);
+    generateMarkdown(
+      input,
+      path.join(output, config.MARKDOWN_DIRECTORY_FOR_PDF),
+      config.ANCHOR_CHARS_TO_EXLUDE_FOR_PDF
+    );
   } catch (error) {
     let message = 'Unable to generate markdown. ';
     if (error.message) {
