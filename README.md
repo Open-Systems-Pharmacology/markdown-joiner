@@ -73,9 +73,15 @@ npm run start -- --input "C:\reporting engine\reporting engine output" --output 
 set DEBUG=* & npm run start -- --input <path_to_input_directory> --output <path_to_output_directory>
 ```
 
-## Styling PDF
+## Creating the PDF
 
-PDF documents can be styled by modifying `src/styles/pdf-styles.css`.
+Navigate to `<path_to_output_directory>\markdown_for_pdf` and open the file `report.md` with for instance Typora. PDF is
+just one click away
+
+## Uploading to Github
+
+Navigate to `<path_to_output_directory>\markdown_for_github`. You can upload the file `report.md` along with the folder
+`images` to github to create a live documentation
 
 ## Uninstall
 
