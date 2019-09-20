@@ -137,6 +137,18 @@ const generateSummaryFile = (content, summaryFileName, createAnchor, parentDirec
   });
 };
 
+const generateIntro = (inputPath, introFileName) => {
+  const globOptions = {
+    nodir: true,
+    dot: false
+  };
+  const introFiles = glob.sync(`${inputPath}/*`, globOptions);
+  introFiles.forEach(file => {
+    const intro = fs.readFileSync(file, 'utf8');
+    writeToFile(introFileName, intro);
+  });
+};
+
 // Returns a valid markdown anchor from a header that can be used to navigate within a single document
 // code taken from https://gist.github.com/asabaylus/3071099#gistcomment-2563127 for completion
 const createMarkdownAnchorFunc = charsToExclude => {
@@ -151,30 +163,9 @@ const createMarkdownAnchorFunc = charsToExclude => {
       .replace(/[　。？！，、；：“”【】（）〔〕［］﹃﹄“”‘’﹁﹂—…－～《》〈〉「」]/g, '');
 };
 
-const createAnchor = val =>
-  val
-    .toLowerCase()
-    .replace(/ /g, '-')
-    // single chars that are removed
-    .replace(/[`~!@#$%^&*()+=<>?,./:;"'|{}\[\]\\–—]/g, '')
-    // CJK punctuations that are removed
-    .replace(/[　。？！，、；：“”【】（）〔〕［］﹃﹄“”‘’﹁﹂—…－～《》〈〉「」]/g, '');
-
 const getNextLevel = currentLevel => {
   const levelCount = Math.min(config.SECTION_LEVELS, config.MAX_SUPPORTED_SECTION_LEVELS);
   return currentLevel === levelCount ? currentLevel : currentLevel + 1;
-};
-
-const generateIntro = (inputPath, introFileName) => {
-  const globOptions = {
-    nodir: true,
-    dot: false
-  };
-  const introFiles = glob.sync(`${inputPath}/*`, globOptions);
-  introFiles.forEach(file => {
-    const intro = fs.readFileSync(file, 'utf8');
-    writeToFile(introFileName, intro);
-  });
 };
 
 module.exports = {

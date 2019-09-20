@@ -6,10 +6,9 @@ const path = require('path');
 const fs = require('fs');
 const rimraf = require('rimraf');
 const miscHelpers = require('./helpers/misc-helpers');
-const { parseInput, createDirectory } = miscHelpers;
+const { createDirectory } = miscHelpers;
 const { generateMarkdown } = require('./helpers/markdown-helpers');
 const config = require('./config');
-const generatePDF = require('./helpers/pdf-helpers').generatePDF;
 
 const main = () => {
   try {
@@ -22,13 +21,6 @@ const main = () => {
     } else if (fs.existsSync(output) && fs.readdirSync(output).length > 0) {
       throw new Error(`'${output}' is not empty. Use -f to force delete.`);
     }
-
-    const createAnchor = val =>
-      val
-        .toLowerCase()
-        .replace(/ /g, '-')
-        // single chars that are removed
-        .replace(/[.]/g, '');
 
     createDirectory(output);
     // Github
