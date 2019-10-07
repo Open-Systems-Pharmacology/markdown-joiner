@@ -6,11 +6,9 @@ const path = require('path');
 const fs = require('fs');
 const rimraf = require('rimraf');
 const miscHelpers = require('./helpers/misc-helpers');
-const { parseInput, createDirectory } = miscHelpers;
+const { createDirectory } = miscHelpers;
 const { generateMarkdown } = require('./helpers/markdown-helpers');
-const { generateHTML } = require('./helpers/html-helpers');
 const config = require('./config');
-const generatePDF = require('./helpers/pdf-helpers').generatePDF;
 
 const main = () => {
   try {
@@ -25,16 +23,19 @@ const main = () => {
     }
 
     createDirectory(output);
-
-    // MARKDOWN
-    const markdownDirectory = path.join(output, config.MARKDOWN_DIRECTORY);
-    generateMarkdown(input, markdownDirectory);
-
-    // HTML
-    generateHtmlFor(output, markdownDirectory);
+    // Github
+    generateMarkdown(
+      input,
+      path.join(output, config.MARKDOWN_DIRECTORY_FOR_GITHUB),
+      config.ANCHOR_CHARS_TO_EXLUDE_FOR_GITHUB
+    );
 
     // PDF
-    generatePdfFor(input, output);
+    generateMarkdown(
+      input,
+      path.join(output, config.MARKDOWN_DIRECTORY_FOR_PDF),
+      config.ANCHOR_CHARS_TO_EXLUDE_FOR_PDF
+    );
   } catch (error) {
     let message = 'Unable to generate markdown. ';
     if (error.message) {
@@ -43,29 +44,6 @@ const main = () => {
     console.error(message); // eslint-disable-line
     debug(error);
   }
-};
-
-const generatePdfFor = (input, output) => {
-  const pdfDirectory = path.join(output, config.PDF_DIRECTORY);
-  createDirectory(pdfDirectory);
-
-  const markdownDirectoryForPDF = path.join(output, config.MARKDOWN_DIRECTORY_FOR_PDF);
-  generateMarkdown(input, markdownDirectoryForPDF, false);
-
-  const parsedMarkdown = parseInput(markdownDirectoryForPDF);
-
-  generatePDF(parsedMarkdown, pdfDirectory);
-};
-
-const generateHtmlFor = (output, markdownDirectory) => {
-  const htmlDirectory = path.join(output, config.HTML_DIRECTORY);
-  createDirectory(htmlDirectory);
-
-  const stylesFile = path.join(__dirname, config.STYLES_DIRECTORY, config.HTML_STYLES_FILE);
-  fs.writeFileSync(path.join(htmlDirectory, config.HTML_STYLES_FILE), fs.readFileSync(stylesFile));
-
-  const parsedMarkdown = parseInput(markdownDirectory);
-  generateHTML(parsedMarkdown, htmlDirectory);
 };
 
 main();

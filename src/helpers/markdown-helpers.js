@@ -6,64 +6,49 @@ const config = require('../config');
 const miscHelpers = require('./misc-helpers');
 const { hasChildren, writeToFile, isMarkdown, fileShouldBeIgnored, isImage, parseInput, createDirectory } = miscHelpers;
 
-const generateMarkdown = (input, markdownDirectory, createImageAsRelative = true) => {
+const generateMarkdown = (input, markdownDirectory, charsToExclude) => {
   const parsedInput = parseInput(input);
   createDirectory(markdownDirectory);
-
-  const introFileName = path.join(markdownDirectory, config.INTRO_FILE);
-  generateIntro(input, introFileName);
-
-  const summaryFileName = path.join(markdownDirectory, config.SUMMARY_FILE);
-  generateSummaryFileTitle(summaryFileName);
-  generateSummaryFile(parsedInput, summaryFileName);
-  generateMarkdownForContent(parsedInput, markdownDirectory, createImageAsRelative);
+  const imageDirectory = path.join(markdownDirectory, config.IMAGES_DIRECTORY);
+  const contentFile = path.join(markdownDirectory, config.SINGLE_MARKDOWN_FILE);
+  const createAnchor = createMarkdownAnchorFunc(charsToExclude);
+  createDirectory(imageDirectory);
+  generateIntro(input, contentFile);
+  generateSummaryFileTitle(contentFile);
+  generateSummaryFile(parsedInput, contentFile, createAnchor);
+  generateMarkdownContent(parsedInput, contentFile, imageDirectory);
 };
 
-const generateMarkdownForContent = (
-  content,
-  outputDirectory,
-  createImageAsRelative,
-  parentDirectory = '',
-  currentLevel = 0
-) => {
+const generateMarkdownContent = (content, contentFile, imageDirectory, parentDirectory = '', currentLevel = 0) => {
   const level = getNextLevel(currentLevel);
 
   content.forEach(item => {
     if (item.type === config.DIRECTORY && hasChildren(item)) {
       const inputFolderName = path.join(parentDirectory, item.name);
-      const folderName = path.join(outputDirectory, parentDirectory, item.name);
-      if (!fs.existsSync(folderName)) {
-        fs.mkdirSync(folderName);
+      const outputImageFolderName = path.join(imageDirectory, parentDirectory, item.name);
+      if (!fs.existsSync(outputImageFolderName)) {
+        fs.mkdirSync(outputImageFolderName);
       }
-      generateMarkdownForChapter(item, folderName, inputFolderName, outputDirectory, level, createImageAsRelative);
-      generateMarkdownForContent(item.children, outputDirectory, createImageAsRelative, inputFolderName, level);
+      concatenateMarkdownForChapter(item, contentFile, outputImageFolderName, level);
+      generateMarkdownContent(item.children, contentFile, imageDirectory, inputFolderName, level);
     }
   });
 };
 
-const generateMarkdownForChapter = (
-  chapter,
-  folderName,
-  parentDirectory,
-  outputDirectory,
-  level,
-  createImageAsRelative
-) => {
+const concatenateMarkdownForChapter = (chapter, contentFile, outputImageFolderName, level) => {
   if (!chapter.children) {
     return;
   }
-  const outputFile = `${path.join(folderName, chapter.name)}.md`;
-  debug(`Generating markdown for ${outputFile}`);
 
-  insertCharpterTitle(chapter, outputFile, level);
-  insertChapterContent(chapter, outputFile);
+  insertCharpterTitle(chapter, contentFile, level);
+  insertChapterContent(chapter, contentFile);
 
   chapter.children.forEach(item => {
     if (item.type !== config.DIRECTORY) {
       if (isImage(item)) {
-        insertImage(item, outputFile, parentDirectory, outputDirectory, createImageAsRelative);
+        insertImage(item, contentFile, outputImageFolderName);
       } else {
-        insertMarkdown(item, outputFile, path.join(folderName, item.name));
+        insertMarkdown(item, contentFile);
       }
     }
   });
@@ -85,11 +70,11 @@ const insertChapterContent = (chapter, outputFile) => {
   writeToFile(outputFile, content);
 };
 
-const insertImage = (item, outputFile, parentDirectory, outputDirectory, createImageAsRelative) => {
-  const imageTargetPath = path.join(outputDirectory, parentDirectory, item.name);
-  const imagePath = createImageAsRelative ? item.name : imageTargetPath;
+const insertImage = (item, outputFile, outputDirectory) => {
+  const imageTargetPath = path.join(outputDirectory, item.name);
+  const relativeImagePath = createRelativePath(outputFile, imageTargetPath);
   debug(`Inserting image ${item.name} from ${imageTargetPath}`);
-  const imageMarkdown = `![${item.name}](${imagePath})\n`;
+  const imageMarkdown = `![${item.name}](${relativeImagePath})\n`;
   writeToFile(outputFile, imageMarkdown);
   fs.copyFileSync(item.path, imageTargetPath);
 };
@@ -117,32 +102,39 @@ const getChapterTitle = chapter => {
   return fs.readFileSync(titleFile, 'utf8').replace(/^\s+|\s+$/g, '');
 };
 
+const createRelativePath = (fromFile, toFile) => {
+  const relativePath = path.relative(fromFile, toFile);
+  //needs to remove the first relative sign as we are dealing with files and not folder
+  if (relativePath.startsWith('..')) {
+    return relativePath.substr('../'.length);
+  }
+  return relativePath;
+};
 const generateSummaryFileTitle = summaryFileName => {
   writeToFile(summaryFileName, config.SUMMARY_FILE_TITLE);
 };
 
-const generateSummaryFile = (content, summaryFileName, parentDirectory = '', currentLevel = 0) => {
+const generateSummaryFile = (content, summaryFileName, createAnchor, parentDirectory = '', currentLevel = 0) => {
   debug(`Generating summary file: ${summaryFileName}`);
-
+  const tab = '  ';
   const level = getNextLevel(currentLevel);
+
   content.forEach(item => {
     if (fileShouldBeIgnored(item)) {
       return;
     }
-    if (item.type === 'directory') {
-      const link = path.join(parentDirectory, item.name, `${item.name}.md`);
-      const tab = '  ';
-      writeToFile(summaryFileName, `${tab.repeat(level)}* [${getChapterTitle(item)}](${link})`);
-      if (hasChildren(item)) {
-        generateSummaryFile(item.children, summaryFileName, path.join(parentDirectory, item.name), level);
-      }
+    if (item.type !== 'directory') {
+      return;
+    }
+
+    const title = getChapterTitle(item);
+
+    writeToFile(summaryFileName, `${tab.repeat(level)}* [${title}](#${createAnchor(title)})`);
+
+    if (hasChildren(item)) {
+      generateSummaryFile(item.children, summaryFileName, createAnchor, path.join(parentDirectory, item.name), level);
     }
   });
-};
-
-const getNextLevel = currentLevel => {
-  const levelCount = Math.min(config.SECTION_LEVELS, config.MAX_SUPPORTED_SECTION_LEVELS);
-  return currentLevel === levelCount ? currentLevel : currentLevel + 1;
 };
 
 const generateIntro = (inputPath, introFileName) => {
@@ -155,6 +147,25 @@ const generateIntro = (inputPath, introFileName) => {
     const intro = fs.readFileSync(file, 'utf8');
     writeToFile(introFileName, intro);
   });
+};
+
+// Returns a valid markdown anchor from a header that can be used to navigate within a single document
+// code taken from https://gist.github.com/asabaylus/3071099#gistcomment-2563127 for completion
+const createMarkdownAnchorFunc = charsToExclude => {
+  const removeRegEx = new RegExp(charsToExclude, 'g');
+  return val =>
+    val
+      .toLowerCase()
+      .replace(/ /g, '-')
+      // single chars that are removed
+      .replace(removeRegEx, '')
+      // CJK punctuations that are removed
+      .replace(/[　。？！，、；：“”【】（）〔〕［］﹃﹄“”‘’﹁﹂—…－～《》〈〉「」]/g, '');
+};
+
+const getNextLevel = currentLevel => {
+  const levelCount = Math.min(config.SECTION_LEVELS, config.MAX_SUPPORTED_SECTION_LEVELS);
+  return currentLevel === levelCount ? currentLevel : currentLevel + 1;
 };
 
 module.exports = {
