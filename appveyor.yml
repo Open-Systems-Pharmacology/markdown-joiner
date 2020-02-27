@@ -1,3 +1,5 @@
+image: Visual Studio 2019
+
 environment:
   app_version: '1.2.0'
 
