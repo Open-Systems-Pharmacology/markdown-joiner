@@ -7,7 +7,7 @@
   "bin": "./src/index.js",
   "scripts": {
     "start": "node ./src/index.js",
-    "bundle": "nexe ./src/index.js -r ./src/styles/**/*"
+    "bundle": "npx nexe ./src/index.js -r ./src/styles/**/* -t x86-8.0.0"
   },
   "private": false,
   "keywords": [],
