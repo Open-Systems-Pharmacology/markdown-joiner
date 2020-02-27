@@ -1,6 +1,6 @@
 image: Visual Studio 2019
 
-  environment:
+environment:
   app_version: '1.2.0'
 
 version: '$(app_version).{build}'
