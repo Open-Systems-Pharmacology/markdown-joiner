@@ -15,11 +15,15 @@ const main = () => {
     const args = parseArgumentOptions();
     const { force, input, output } = args;
 
+    if (!fs.existsSync(input)) {
+      throw new Error(`Input folder '${input}' does not exist.`);
+    }
+
     if (force) {
       debug('Deleting output folder.');
       rimraf.sync(output);
     } else if (fs.existsSync(output) && fs.readdirSync(output).length > 0) {
-      throw new Error(`'${output}' is not empty. Use -f to force delete.`);
+      throw new Error(`Output folder '${output}' is not empty. Use -f to force delete.`);
     }
 
     createDirectory(output);
