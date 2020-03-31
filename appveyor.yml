@@ -20,10 +20,11 @@ skip_tags: true
 platform: x64
 
 install:
+  - ps Install-Product node LTS
+  - node -v
   - npm install
 
 build_script:
-  - node -v
   - npm run bundle
   - 7z a markdown-joiner.zip node_modules  src markdown-joiner.exe
 
