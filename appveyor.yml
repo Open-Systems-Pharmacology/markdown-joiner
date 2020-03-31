@@ -20,7 +20,7 @@ skip_tags: true
 platform: x64
 
 install:
-  - ps Install-Product node LTS
+  - ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:PLATFORM
   - node -v
   - npm install
 
