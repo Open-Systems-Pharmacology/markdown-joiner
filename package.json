@@ -1,13 +1,13 @@
 {
   "name": "@ospsuite/markdown-joiner",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Markdown reporting engine for the Open Systems Pharmacology platform",
   "author": "Open Systems Pharmacology",
   "main": "index.js",
   "bin": "./src/index.js",
   "scripts": {
     "start": "node ./src/index.js",
-    "bundle": "npx nexe ./src/index.js -r ./src/styles/**/* -t x86-8.0.0"
+    "bundle": "npx nexe ./src/index.js -r ./src/styles/**/*"
   },
   "private": false,
   "keywords": [],
