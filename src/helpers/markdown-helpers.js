@@ -101,11 +101,11 @@ const getChapterTitle = chapter => {
   }
   return fs.readFileSync(titleFile, 'utf8').replace(/^\s+|\s+$/g, '');
 };
-
 const createRelativePath = (fromFile, toFile) => {
-  const relativePath = path.relative(fromFile, toFile);
+  const relativePath = path.relative(fromFile, toFile).replace(/\\/g, '/');
+
   //needs to remove the first relative sign as we are dealing with files and not folder
-  if (relativePath.startsWith('..')) {
+  if (relativePath.startsWith('../')) {
     return relativePath.substr('../'.length);
   }
   return relativePath;

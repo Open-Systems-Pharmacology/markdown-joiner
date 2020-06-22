@@ -1,5 +1,8 @@
+image: Visual Studio 2019
+
 environment:
-  app_version: '1.1.0'
+  app_version: '1.2.0'
+  nodejs_version: '8.12'
 
 version: '$(app_version).{build}'
 
@@ -14,7 +17,11 @@ pull_requests:
 
 skip_tags: true
 
+platform: x64
+
 install:
+  - ps: Install-Product node $env:nodejs_version $env:platform
+  - node -v
   - npm install
 
 build_script:
