@@ -1,3 +1,6 @@
+OBSOLETE: This package is not required anymore with the new implementation of the Reporting Engine. 
+https://github.com/Open-Systems-Pharmacology/OSPSuite.ReportingEngine
+
 # Installation
 
 ## Requirements
